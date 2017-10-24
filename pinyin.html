@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>汉字拼音练习</title>
+</head>
+<body>
+<article class="markdown-body entry-content" itemprop="text"><h1><a href="#一个实现汉字与拼音互转的小巧web工具库" aria-hidden="true" class="anchor" id="user-content-一个实现汉字与拼音互转的小巧web工具库"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>一个实现汉字与拼音互转的小巧web工具库</h1>
+    <p>一个实现汉字与拼音互转的小巧web工具库，另外还包含一个非常非常简单的JS版拼音输入法。</p>
+    <p>演示地址：<a href="http://demo.liuxianan.com/pinyinjs/index.html">http://demo.liuxianan.com/pinyinjs/index.html</a></p>
+    <p>详细介绍：<a href="http://blog.liuxianan.com/pinyinjs.html">http://blog.liuxianan.com/pinyinjs.html</a></p>
+    <p>本工具的优点：</p>
+    <ol>
+        <li>体积足够小，适合web环境，常见汉字字典文件仅26kb，完整汉字也只有122kb，应该说是互联网上最小的；</li>
+        <li>支持多种输出格式，如带声调、不带声调、拼音首字母；</li>
+        <li>支持多音字：如果不引入词库文件，会将所有结果枚举出来，如果引入词库，则可以识别多音字（当然识别的准确度有待持续完善），由于词库较大，一般不推荐web环境使用；</li>
+        <li>附带一个简单的JS版拼音输入法；</li>
+    </ol>
+    <h1><a href="#前言" aria-hidden="true" class="anchor" id="user-content-前言"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>前言</h1>
+    <p>网上关于JS实现汉字和拼音互转的文章很多，但是比较杂乱，都是互相抄来抄去，而且有的不支持多音字，有的不支持声调，有的字典文件太大，还比如有时候我仅仅是需要获取汉字拼音首字母却要引入200kb的字典文件，无法根据实际需要满足需求。</p>
+    <p>综上，我精心整理并修改了网上几种常见的字典文件并简单封装了一下可以直接拿来用的工具库。</p>
+    <h1><a href="#关于多音字" aria-hidden="true" class="anchor" id="user-content-关于多音字"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>关于多音字</h1>
+    <p>鉴于很多人都比较关心多音字的问题，所以单独拿出一个小章节来介绍多音字的相关问题。</p>
+    <p>准确识别各种复杂语句中混杂的多音字其实并没有那么容易，有两个关键的地方，一个是多音字词库的丰富程度，一个是能否正确的给语句进行分词。而词库和分词的实现都需要一个非常丰富的<code>词典</code>文件，现代汉语词语有多少个，估计没有人算得清，再加上每天新出现的人名、网络词语、科技词语等等。一个普通的词库文件至少也有几百kb，所以不太适合web环境下去实现，一般最好放在服务器端做成一个接口。</p>
+    <p>鉴于很多人都希望有多音字识别的功能，所以我简单实现了一个版本。词库文件是从<a href="https://github.com/hotoo/pinyin/tree/master/data/phrases-dict.js">这里</a>找到的，并根据实际情况将文件从<code>1.8M</code>压缩到了<code>912kb</code>，分词暂时只是自己非常简单的实现(也可以说压根就没有分词)，如果是服务器端推荐几个不错的中文分词工具：Python版的<a href="https://github.com/fxsjy/jieba">Jieba</a>和<a href="https://github.com/yanyiwu/nodejieba">NodeJieba</a>，性能非常好，其它语言版的参考上面项目的README。</p>
+    <p>关于分词，摘抄一段网络解释：</p>
+    <blockquote>
+        <p>词是最小的能够独立活动的有意义的语言成分，英文单词之间是以空格作为自然分界符的，而汉语是以字为基本的书写单位，词语之间没有明显的区分标记，因此，要对中文信息进行处理，正确的分词就显得尤为关键。</p>
+    </blockquote>
+    <p>比如<code>看中国</code>这一个词，单独的<code>看中</code>读<code>kàn zhòng</code>，<code>中国</code>读<code>zhōng guó</code>，连在一起却读作<code>kàn zhōng guó</code>。</p>
+    <p>我这个实现非常得简单，效果一般，性能也一般，需要下载将近1M的词库文件，所以不适合web环境，演示地址：</p>
+    <p><a href="http://demo.liuxianan.com/pinyinjs/polyphone.html">http://demo.liuxianan.com/pinyinjs/polyphone.html</a></p>
+    <h1><a href="#拼音字典文件" aria-hidden="true" class="anchor" id="user-content-拼音字典文件"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>拼音字典文件</h1>
+    <p>按照字典文件的大小从小到大依次介绍。</p>
+    <h2><a href="#字典一拼音首字母" aria-hidden="true" class="anchor" id="user-content-字典一拼音首字母"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>字典一：拼音首字母</h2>
+    <p>该<a href="https://github.com/liuxianan/pinyinjs/blob/master/pinyin_dict_firstletter.js">字典文件</a>的内容大致如下：</p>
+    <div class="highlight highlight-source-js"><pre><span class="pl-c"><span class="pl-c">/**</span></span>
+<span class="pl-c"> * 拼音首字母字典文件</span>
+<span class="pl-c"> <span class="pl-c">*/</span></span>
+<span class="pl-k">var</span> pinyin_dict_firstletter <span class="pl-k">=</span> {};
+<span class="pl-smi">pinyin_dict_firstletter</span>.<span class="pl-c1">all</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>YDYQSXMWZSSXJBYMGCCZQPSSQBYCDSCDQLDYLYBSSJG...<span class="pl-pds">"</span></span>;
+<span class="pl-smi">pinyin_dict_firstletter</span>.<span class="pl-smi">polyphone</span> <span class="pl-k">=</span> {<span class="pl-s"><span class="pl-pds">"</span>19969<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>DZ<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>19975<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>WM<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>19988<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>QJ<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>20048<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>YL<span class="pl-pds">"</span></span>,<span class="pl-k">...</span>};</pre></div>
+    <p>该数据字典将Unicode字符中<code>4E00</code>(19968)-<code>9FA5</code>(40869)共计20902个汉字的拼音首字母拼接在一起得到一个很长的字符串，然后再将有多音字的汉字（共计370个多音字）单独列出来。该字典文件大小为<code>25kb</code>。</p>
+    <p>该字典文件优点是体积小，支持多音字，缺点是只能获取拼音首字母。</p>
+    <h2><a href="#字典二常用汉字" aria-hidden="true" class="anchor" id="user-content-字典二常用汉字"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>字典二：常用汉字</h2>
+    <p>该字典文件将汉字按照拼音进行归类，共计401种组合，收录了6763个常用汉字，不支持多音字。由于从网络上收集的，收录字数较少，所以文件体积只有24kb，后续有空看能不能给扩充一下。</p>
+    <p>字典文件大致内容如下（这里只是示例，所以只展示一小部分）：</p>
+    <div class="highlight highlight-source-js"><pre><span class="pl-c"><span class="pl-c">/**</span></span>
+<span class="pl-c"> * 常规拼音数据字典，收录常见汉字6763个，不支持多音字</span>
+<span class="pl-c"> <span class="pl-c">*/</span></span>
+<span class="pl-k">var</span> pinyin_dict_notone <span class="pl-k">=</span>
+{
+	<span class="pl-s"><span class="pl-pds">"</span>a<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>啊阿锕<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>ai<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>埃挨哎唉哀皑癌蔼矮艾碍爱隘诶捱嗳嗌嫒瑷暧砹锿霭<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>an<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>鞍氨安俺按暗岸胺案谙埯揞犴庵桉铵鹌顸黯<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>ang<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>肮昂盎<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>ao<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>凹敖熬翱袄傲奥懊澳坳拗嗷噢岙廒遨媪骜聱螯鏊鳌鏖<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>ba<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>芭捌扒叭吧笆八疤巴拔跋靶把耙坝霸罢爸茇菝萆捭岜灞杷钯粑鲅魃<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>bai<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>白柏百摆佰败拜稗薜掰鞴<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>ban<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>斑班搬扳般颁板版扮拌伴瓣半办绊阪坂豳钣瘢癍舨<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>bang<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>邦帮梆榜膀绑棒磅蚌镑傍谤蒡螃<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>bao<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>苞胞包褒雹保堡饱宝抱报暴豹鲍爆勹葆宀孢煲鸨褓趵龅<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>bo<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>剥薄玻菠播拨钵波博勃搏铂箔伯帛舶脖膊渤泊驳亳蕃啵饽檗擘礴钹鹁簸跛<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>bei<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>杯碑悲卑北辈背贝钡倍狈备惫焙被孛陂邶埤蓓呗怫悖碚鹎褙鐾<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>ben<span class="pl-pds">"</span></span><span class="pl-k">:</span><span class="pl-s"><span class="pl-pds">"</span>奔苯本笨畚坌锛<span class="pl-pds">"</span></span>
+	<span class="pl-c"><span class="pl-c">//</span> 省略其它</span>
+};</pre></div>
+    <p>后来慢慢发现这个字典文件中存在诸多错误，比如把<code>虐</code>的拼音写成了<code>nue</code>（正确写法应该是nve）,<code>躺</code>写成了<code>thang</code>，而且不支持多音字，所以后来我根据其它字典文件自己重新生成了一份这样格式的 <a href="https://github.com/liuxianan/pinyinjs/blob/master/pinyin_dict_notone.js">字典文件</a>：</p>
+    <ul>
+        <li>共有404种拼音组合</li>
+        <li>收录了6763个常用汉字</li>
+        <li>支持多音字</li>
+        <li>不支持声调</li>
+        <li>文件大小为27kb</li>
+    </ul>
+    <p>同时，我根据网上一份<a href="http://blog.sina.com.cn/s/blog_5e2ffb490100dnfg.html">常用6763个汉字使用频率表</a>，将这6763个汉字按照使用频率进行了排序，这样就可以实现一个差强人意的JS版输入法了。</p>
+    <p>另外，根据另外一份更完整的字典文件发现其实共有412种拼音组合，上面字典文件中没有出现的8种发音是：</p>
+    <pre><code>chua,den,eng,fiao,m,kei,nun,shei
+</code></pre>
+    <h2><a href="#字典三终极字典" aria-hidden="true" class="anchor" id="user-content-字典三终极字典"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>字典三：终极字典</h2>
+    <p>首先，从网上找的如下结构字典文件（下面称为字典A），具体是哪不记得了，支持声调和多音字，它将Unicode字符中<code>4E00</code>(19968)-<code>9FA5</code>(40869)共计20902个汉字（如果算上〇的话那就是20903个）拼音全部列举，该字典文件大小为<code>280kb</code>：</p>
+    <pre><code>3007 (ling2)
+4E00 (yi1)
+4E01 (ding1,zheng1)
+4E02 (kao3)
+4E03 (qi1)
+4E04 (shang4,shang3)
+4E05 (xia4)
+4E06 (none0)
+4E07 (wan4,mo4)
+4E08 (zhang4)
+4E09 (san1)
+4E0A (shang4,shang3)
+4E0B (xia4)
+4E0C (ji1)
+4E0D (bu4,bu2,fou3)
+4E0E (yu3,yu4,yu2)
+4E0F (mian3)
+4E10 (gai4)
+4E11 (chou3)
+4E12 (chou3)
+4E13 (zhuan1)
+4E14 (qie3,ju1)
+...
+</code></pre>
+    <p>其中，对于没有或者找不到读音的汉字，统一标注为<code>none0</code>，我统计了一下，这样的汉字一共有525个。</p>
+    <p>本着将字典文件尽可能减小体积的目标，发现上述文件中除了第一个〇(3007)之外，其它都是连续的，所以我把它改成了如下结构，文件体积也从<code>280kb</code>减小到了<code>117kb</code>：</p>
+    <div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> pinyin_dict_withtone <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>yi1,ding1 zheng1,kao3,qi1,shang4 shang3,xia4,none0,wan4 mo4,zhang4,san1,shang4 shang3,xia4,ji1,bu4 bu2 fou3,yu3 yu4 yu2,mian3,gai4,chou3,chou3,zhuan1,qie3 ju1...<span class="pl-pds">"</span></span>;</pre></div>
+    <p>该字典文件的缺点是声调是用数字标出的，如果想要得出类似<code>xiǎo míng tóng xué</code>这样的拼音的话，需要一个算法将合适位置的字母转换成<code>āáǎàōóǒòēéěèīíǐìūúǔùüǖǘǚǜńň</code>。</p>
+    <p>本来还准备自己尝试写一个转换的方法的，后来又找到了如下<a href="http://zi.artx.cn/zi/">字典文件</a>(下面称为字典B)，它收录了20867个汉字，也支持声调和多音字，但是声调是直接标在字母上方的，由于它将汉字也列举出来，所以文件体积比较大，有<code>327kb</code>，大致内容如下：</p>
+    <div class="highlight highlight-source-js"><pre>{
+	<span class="pl-s"><span class="pl-pds">"</span>吖<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>yā,ā<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>阿<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ā,ē<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>呵<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>hē,a,kē<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>嗄<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>shà,á<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>啊<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ā,á,ǎ,à,a<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>腌<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ā,yān<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>锕<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ā<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>錒<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ā<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>矮<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ǎi<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>爱<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ài<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>挨<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>āi,ái<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>哎<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>āi<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>碍<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ài<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>癌<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ái<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>艾<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ài<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>唉<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>āi,ài<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>蔼<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>ǎi<span class="pl-pds">"</span></span>
+	<span class="pl-c"><span class="pl-c">/*</span> 省略其它 <span class="pl-c">*/</span></span>
+}</pre></div>
+    <p>但是经过比对，发现有502个汉字是字典A中读音为<code>none</code>但是字典B中有读音的，还有21个汉字是字典A中有但是B中没有的：</p>
+    <div class="highlight highlight-source-js"><pre>{
+	<span class="pl-s"><span class="pl-pds">"</span>兙<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>shí kè<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>兛<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>qiān<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>兝<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>fēn<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>兞<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>máo<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>兡<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>bǎi kè<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>兣<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>lǐ<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>唞<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>dǒu<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>嗧<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>jiā lún<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>囍<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>xǐ<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>堎<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>lèng líng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>猤<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>hú<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>瓩<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>qián wǎ<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>礽<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>réng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>膶<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>rùn<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>芿<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>rèng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>蟘<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>tè<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>貣<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>tè<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>酿<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>niàng niàn niáng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>醸<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>niàng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>鋱<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>tè<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>铽<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>tè<span class="pl-pds">"</span></span>
+}</pre></div>
+    <p>还有7个汉字是B中有但是A中没有的：</p>
+    <div class="highlight highlight-source-js"><pre>{
+	<span class="pl-s"><span class="pl-pds">"</span>㘄<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>lēng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>䉄<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>léng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>䬋<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>léng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>䮚<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>lèng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>䚏<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>lèng,lì,lìn<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>㭁<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>réng<span class="pl-pds">"</span></span>,
+	<span class="pl-s"><span class="pl-pds">"</span>䖆<span class="pl-pds">"</span></span><span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>niàng<span class="pl-pds">"</span></span>
+}</pre></div>
+    <p>所以我在字典A的基础上将二者进行了合并，得到了最终的字典文件 <a href="https://github.com/liuxianan/pinyinjs/blob/master/pinyin_dict_withtone.js">pinyin_dict_withtone.js</a>，文件大小为<code>122kb</code>：</p>
+    <pre><code>var pinyin_dict_withtone = "yī,dīng zhēng,kǎo qiǎo yú,qī,shàng,xià,hǎn,wàn mò,zhàng,sān,shàng shǎng,xià,qí jī...";
+</code></pre>
+    <h1><a href="#如何使用" aria-hidden="true" class="anchor" id="user-content-如何使用"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>如何使用</h1>
+    <p>我将这几种字典文件放在一起并简单封装了一下解析方法，使用中可以根据实际需要引入不同字典文件。</p>
+    <p>封装好的3个方法：</p>
+    <div class="highlight highlight-source-js"><pre><span class="pl-c"><span class="pl-c">/**</span></span>
+<span class="pl-c"> * 获取汉字的拼音首字母</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">str</span> 汉字字符串，如果遇到非汉字则原样返回</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">polyphone</span> 是否支持多音字，默认false，如果为true，会返回所有可能的组合数组</span>
+<span class="pl-c"> <span class="pl-c">*/</span></span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getFirstLetter</span>(str, polyphone);
+<span class="pl-c"><span class="pl-c">/**</span></span>
+<span class="pl-c"> * 根据汉字获取拼音，如果不是汉字直接返回原字符</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">str</span> 要转换的汉字</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">splitter</span> 分隔字符，默认用空格分隔</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">withtone</span> 返回结果是否包含声调，默认是</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">polyphone</span> 是否支持多音字，默认否</span>
+<span class="pl-c"><span class="pl-c">*/</span></span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(str, splitter, withtone, polyphone);
+<span class="pl-c"><span class="pl-c">/**</span></span>
+<span class="pl-c"> * 拼音转汉字，只支持单个汉字，返回所有匹配的汉字组合</span>
+<span class="pl-c"> * <span class="pl-k">@param</span> <span class="pl-smi">pinyin</span> 单个汉字的拼音，不能包含声调</span>
+<span class="pl-c"> <span class="pl-c">*/</span></span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getHanzi</span>(pinyin)；</pre></div>
+    <p>下面分别针对不同场合如何使用作介绍。</p>
+    <h2><a href="#如果你只需要获取拼音首字母" aria-hidden="true" class="anchor" id="user-content-如果你只需要获取拼音首字母"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>如果你只需要获取拼音首字母</h2>
+    <div class="highlight highlight-source-js"><pre><span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyin_dict_firstletter.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyinUtil.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getFirstLetter</span>(<span class="pl-s"><span class="pl-pds">'</span>小茗同学<span class="pl-pds">'</span></span>); <span class="pl-c"><span class="pl-c">//</span> 输出 XMTX</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getFirstLetter</span>(<span class="pl-s"><span class="pl-pds">'</span>大中国<span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span> 输出 ['DZG', 'TZG']</span>
+<span class="pl-k">&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span></pre></div>
+    <p>需要特别说明的是，如果你引入的是其它2个字典文件，也同样可以获取拼音首字母的，只是说用这个字典文件更适合。</p>
+    <h2><a href="#如果拼音不需要声调" aria-hidden="true" class="anchor" id="user-content-如果拼音不需要声调"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>如果拼音不需要声调</h2>
+    <div class="highlight highlight-source-js"><pre><span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyin_dict_notone.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyinUtil.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(<span class="pl-s"><span class="pl-pds">'</span>小茗同学<span class="pl-pds">'</span></span>); <span class="pl-c"><span class="pl-c">//</span> 输出 'xiao ming tong xue'</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getHanzi</span>(<span class="pl-s"><span class="pl-pds">'</span>ming<span class="pl-pds">'</span></span>); <span class="pl-c"><span class="pl-c">//</span> 输出 '明名命鸣铭冥茗溟酩瞑螟暝'</span>
+<span class="pl-k">&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span></pre></div>
+    <h2><a href="#如果需要声调或者需要处理生僻字" aria-hidden="true" class="anchor" id="user-content-如果需要声调或者需要处理生僻字"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>如果需要声调或者需要处理生僻字</h2>
+    <div class="highlight highlight-source-js"><pre><span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyin_dict_withtone.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyinUtil.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(<span class="pl-s"><span class="pl-pds">'</span>小茗同学<span class="pl-pds">'</span></span>); <span class="pl-c"><span class="pl-c">//</span> 输出 'xiǎo míng tóng xué'</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(<span class="pl-s"><span class="pl-pds">'</span>小茗同学<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>-<span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>, <span class="pl-c1">true</span>); <span class="pl-c"><span class="pl-c">//</span> 输出 ['xiǎo-míng-tóng-xué', 'xiǎo-míng-tòng-xué']</span>
+<span class="pl-k">&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span></pre></div>
+    <h2><a href="#如果需要精准识别多音字" aria-hidden="true" class="anchor" id="user-content-如果需要精准识别多音字"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>如果需要精准识别多音字</h2>
+    <p>由于词典文件较大，本示例不推荐在web环境下使用：</p>
+    <div class="highlight highlight-source-js"><pre><span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>dict/pinyin_dict_withtone.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>dict/pinyin_dict_polyphone.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> src<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>pinyinUtil.js<span class="pl-pds">"</span></span><span class="pl-k">&gt;&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span>
+
+<span class="pl-k">&lt;</span>script type<span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(<span class="pl-s"><span class="pl-pds">'</span>长城和长大<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>, <span class="pl-c1">true</span>)； <span class="pl-c"><span class="pl-c">//</span> 输出：cháng chéng hé zhǎng dà</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(<span class="pl-s"><span class="pl-pds">'</span>喝水和喝彩<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>, <span class="pl-c1">true</span>)； <span class="pl-c"><span class="pl-c">//</span> 输出：hē shuǐ hé hè cǎi</span>
+<span class="pl-smi">pinyinUtil</span>.<span class="pl-en">getPinyin</span>(<span class="pl-s"><span class="pl-pds">'</span>伟大的大夫<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>, <span class="pl-c1">true</span>)； <span class="pl-c"><span class="pl-c">//</span> 输出：wěi dà de dài fū</span>
+<span class="pl-k">&lt;</span><span class="pl-k">/</span>script<span class="pl-k">&gt;</span></pre></div>
+    <h1><a href="#关于简单拼音输入法" aria-hidden="true" class="anchor" id="user-content-关于简单拼音输入法"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>关于简单拼音输入法</h1>
+    <p>一个正式的输入法需要考虑的东西太多太多，比如词库、用户个人输入习惯等，这里只是实现一个最简单的输入法，没有任何词库（虽然加上也可以，但是web环境不适合引入太大的文件）。</p>
+    <p>推荐使用第二个字典文件<code>pinyin_dict_noletter.js</code>，虽然字典三字数更多，但是不能按照汉字使用频率排序，一些生僻字反而在前面。</p>
+    <div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">link</span> <span class="pl-e">rel</span>=<span class="pl-s"><span class="pl-pds">"</span>stylesheet<span class="pl-pds">"</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">"</span>text/css<span class="pl-pds">"</span></span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>simple-input-method/simple-input-method.css<span class="pl-pds">"</span></span>&gt;
+&lt;<span class="pl-ent">input</span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">"</span>text<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>test-input-method<span class="pl-pds">"</span></span>/&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>pinyin_dict_noletter.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>pinyinUtil.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>simple-input-method/simple-input-method.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span>&gt;<span class="pl-s1"></span>
+<span class="pl-s1">	<span class="pl-smi">SimpleInputMethod</span>.<span class="pl-en">init</span>(<span class="pl-s"><span class="pl-pds">'</span>.test-input-method<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"></span><span class="pl-s1">&lt;</span>/<span class="pl-ent">script</span>&gt;</pre></div>
+</article>
+<!--<script src="pinyin_dict_firstletter.js"></script>-->
+<!--<script src="pinyin_dict_notone.js"></script>-->        <!--一点都不准-->
+<script src="pinyin_dict_withtone.js"></script>             <!--很全，但是将所有匹配到的汉字都返回不智能-->
+<script src="pinyin_dict_polyphone.js"></script>            <!--必须和字典配合但是很大900k  最好是withtone-->
+<script src="pinyinUtil.js"></script>
+<script>
+    console.log(pinyinUtil.getPinyin('长大','',false,true))
+    //1.要转换的汉字 2.分隔字符，默认用空格分隔 3.返回结果是否包含声调，默认是 4.是否支持多音字，默认否
+
+
+    console.log(pinyinUtil.getFirstLetter('长大和长城',false));
+    //1.要转换的汉字 2.是否支持多音字，默认否
+
+
+    console.log(pinyinUtil.getHanzi('xiao'));
+    //1.拼音转汉字，只支持单个汉字，返回所有匹配的汉字组合(拼音不能包含声调)
+
+    console.log(pinyinUtil.removeTone('xiǎo míng tóng xué'));
+</script>
+</body>
+</html>
